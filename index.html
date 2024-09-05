@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flicker Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            background-color: white;
+            font-family: Arial, sans-serif;
+        }
+        .game-box {
+            width: 200px;
+            height: 200px;
+            background-color: gray;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .hidden {
+            display: none;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .flicker-speed {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        #message {
+            font-size: 32px; /* Larger font size */
+            font-weight: bold;
+            color: #ff5722; /* Different color, e.g., a shade of orange */
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="score" class="score">Points: 1000</div>
+    <div id="flickerSpeed" class="flicker-speed">Flicker Speed: 500ms</div>
+    <div id="message">Click Start to begin the game!</div>
+    <button id="startButton">Start</button>
+
+    <div id="gameBox" class="game-box hidden">Click to Stop!</div>
+
+    <script>
+        let isFlickering = false;
+        let colors = ["red", "black"];
+        let currentColorIndex = 0;
+        let flickerInterval;
+        let pickColor;
+        let points = 1000; // Initial points
+        let flickerSpeed = 500; // Initial flicker interval in milliseconds
+
+        const gameBox = document.getElementById("gameBox");
+        const startButton = document.getElementById("startButton");
+        const message = document.getElementById("message");
+        const scoreDisplay = document.getElementById("score");
+        const flickerSpeedDisplay = document.getElementById("flickerSpeed");
+
+        // Function to show which color user should pick
+        function showPickColor() {
+            pickColor = colors[Math.floor(Math.random() * colors.length)];
+            message.textContent = `Pick the color: ${pickColor}`;
+        }
+
+        // Function to update the score display
+        function updateScore() {
+            scoreDisplay.textContent = `Points: ${points}`;
+        }
+
+        // Function to update the flicker speed display
+        function updateFlickerSpeedDisplay() {
+            flickerSpeedDisplay.textContent = `Flicker Speed: ${flickerSpeed}ms`;
+        }
+
+        // Flickering logic using setInterval
+        function startFlickering() {
+            flickerInterval = setInterval(() => {
+                if (isFlickering) {
+                    currentColorIndex = (currentColorIndex + 1) % 2;
+                    gameBox.style.backgroundColor = colors[currentColorIndex];
+                }
+            }, flickerSpeed);
+        }
+
+        // Start the game
+        startButton.addEventListener("click", () => {
+            if (!isFlickering) {
+                // Start the game
+                showPickColor();
+                gameBox.style.backgroundColor = "gray";  // Reset color before starting
+                gameBox.textContent = "Click to Stop!";
+                gameBox.classList.remove("hidden"); // Show game box
+                startButton.classList.add("hidden"); // Hide start button
+                isFlickering = true;
+                startFlickering();
+            }
+        });
+
+        // Stop the flicker when the user clicks
+        gameBox.addEventListener("click", () => {
+            if (isFlickering) {
+                isFlickering = false;
+                clearInterval(flickerInterval);
+                // Check if user clicked on the correct color
+                if (gameBox.style.backgroundColor === pickColor) {
+                    gameBox.textContent = "You Win!";
+                    points *= 2; // Double points on win
+                    flickerSpeed = Math.max(flickerSpeed - 50, 100); // Increase flicker speed, but not below 100ms
+                } else {
+                    gameBox.textContent = "You Lose!";
+                    points = Math.floor(points / 2); // Halve points on loss
+                    flickerSpeed = Math.min(flickerSpeed + 50, 2000); // Decrease flicker speed, but not above 2000ms
+                }
+                updateScore(); // Update score display
+                updateFlickerSpeedDisplay(); // Update flicker speed display
+                // Show result and prepare for next round
+                startButton.classList.remove("hidden"); // Show start button
+                message.textContent = "Click Start to begin the game!";
+            }
+        });
+    </script>
+</body>
+</html>
